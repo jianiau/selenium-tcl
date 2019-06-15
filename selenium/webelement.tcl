@@ -179,6 +179,15 @@ namespace eval ::selenium::webelement {
 		method find_elements {args} {
             return [$driver find_elements {*}$args -root $selenium_ID -level 1]
 		}        
+        method get_screenshot_as_base64 {} {
+            return [$driver get_screenshot_as_base64 $element_ID]
+        }
+        method get_screenshot_as_png {} {
+            return [$driver get_screenshot_as_png $element_ID]
+        }
+        method get_screenshot_as_file {filename} {
+            $driver get_screenshot_as_file $filename $element_ID
+        }
     }
 }
 

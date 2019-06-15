@@ -127,7 +127,6 @@ namespace eval ::selenium {
 			# 
 			# :Returns:
 			# 	The command's JSON response loaded into a dict object.
-
 			set response [$remote_connection dispatch $session_ID $command_name $args]
 
 			set json_response [$error_handler check_response $session_ID $command_name $args $response]
@@ -789,7 +788,7 @@ namespace eval ::selenium {
 			return $current_capabilities
 		}
 
-		method get_screenshot_as_file {filename} {
+		method get_screenshot_as_file {filename {element_ID ""}} {
 			# Gets the screenshot of the current window. Returns False if there is
 			# any IOError, else returns True. Use full paths in your filename.
 			# 
@@ -799,7 +798,7 @@ namespace eval ::selenium {
 			# :Usage:
 			# 	driver get_screenshot_as_file /Screenshots/foo.png
 
-			set png [my get_screenshot_as_png]
+			set png [my get_screenshot_as_png $element_ID]
 			
 			if { [catch {open $filename wb} fileId] } {
 				return false
@@ -814,20 +813,22 @@ namespace eval ::selenium {
 		
 		forward save_screenshot get_screenshot_as_file
 		
-		method get_screenshot_as_png {} {
+		method get_screenshot_as_png {{element_ID ""}} {
 			# Gets the screenshot of the current window as a binary data.
-
-			return [::base64::decode [my get_screenshot_as_base64]]
+		    return [::base64::decode [my get_screenshot_as_base64 $element_ID]]
 		}
 		
-		method get_screenshot_as_base64 {} {
+		method get_screenshot_as_base64 {{element_ID ""}} {
 			# Gets the screenshot of the current window as a base64 encoded string
 			# which is useful in embedded images in HTML.
 			# 
 			# :Usage:
 			# 	driver get_screenshot_as_base64
-
-			return [my execute_and_get_value $Command(SCREENSHOT)]
+            if {$element_ID eq ""} {
+                return [my execute_and_get_value $Command(SCREENSHOT)]
+			} else {
+				return [my execute_and_get_value $Command(ELEMENT_SCREENSHOT) id $element_ID]
+			}
 		}
 		
 		method set_window_size {width height {windowHandle current}} {

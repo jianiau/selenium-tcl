@@ -75,6 +75,7 @@ namespace eval ::selenium {
 		"$Command(GET_TITLE)" {GET /session/:sessionId/title {sessionId} {}}
 		"$Command(GET_PAGE_SOURCE)" {GET /session/:sessionId/source {sessionId} {}}
 		"$Command(SCREENSHOT)" {GET /session/:sessionId/screenshot {sessionId} {}}
+		"$Command(ELEMENT_SCREENSHOT)" {GET /session/:sessionId/element/:id/screenshot {sessionId id}}
 		"$Command(FIND_ELEMENT)" {POST /session/:sessionId/element {sessionId} {dict using string value string}}
 		"$Command(FIND_ELEMENTS)" {POST /session/:sessionId/elements {sessionId} {dict using string value string}}
 		"$Command(GET_ACTIVE_ELEMENT)" {POST /session/:sessionId/element/active {sessionId} {}}
