@@ -41,7 +41,7 @@ namespace eval ::selenium {
         method move_mouse_to_element {element_ID {xoffset {}} {yoffset {}}} {
             # Moving the mouse to the middle of an element, possibly adding some offsets
             
-            if {($xoffset ne "") && (yoffset ne "")} {
+            if {($xoffset ne "") && ($yoffset ne "")} {
                 my execute $Command(MOVE_TO) xoffset $xoffset yoffset $yoffset element $element_ID
             } else {
                 my execute $Command(MOVE_TO) element $element_ID
