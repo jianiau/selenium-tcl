@@ -1,0 +1,1417 @@
+<html>
+<head>
+    <title>Selenium Tcl</title>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="assets/agate.css">
+    <link rel="stylesheet" href="assets/markdown.css">
+    
+    <script src="assets/highlight.js"></script>
+    <style>
+        body {
+            margin:0;
+            padding: 0
+        }
+        div.container {
+            position:relative;
+            width: 80%;
+            margin: auto auto;
+        }
+
+        .banner {
+            color:red; 
+            font-weight:bold;
+            background-color: black;
+            padding-bottom: 10px
+        }
+        
+        #footer {
+            margin-top: 33px;
+            color: white;
+            background-color: brown;
+            height: 65px;
+            padding-top: 16px;
+            text-align:center
+        }
+        .markdown-body pre {
+            color: white
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="markdown-body">
+
+<h1>Selenium</h1>
+<p>Selenium is a test tool for web applications. It can be used for writting spiders.</p>
+<h1>1. Getting Started</h1>
+<h2>1.1. Simple Usage</h2>
+<p>Once the package selenium is installed and can be found using the variable <strong>auto_path</strong>,  you can start using it:</p>
+<pre><code class="hljs tcl"><span class="hljs-keyword">package</span> require selenium::chrome
+
+<span class="hljs-keyword">namespace</span> import ::selenium::ChromeDriver
+
+<span class="hljs-keyword">set</span> driver [ChromeDriver new]
+
+$driver get <span class="hljs-keyword">http</span>://wiki.tcl.tk/
+
+<span class="hljs-keyword">puts</span> [$driver title]
+<span class="hljs-keyword">set</span> input_search [$driver find_element_by_id searchtxt]
+$driver send_keys $input_search selenium
+$driver send_keys $input_search $selenium::Key(RETURN)
+<span class="hljs-keyword">after</span> <span class="hljs-number">4000</span>
+$driver <span class="hljs-keyword">close</span>
+</code></pre>
+<p>The above script can be saved into a file (eg:- wiki_tcl_search.tcl), then it can be run like this:</p>
+<pre><code>tclsh wiki_tcl_search.tcl
+</code></pre>
+<h2>1.2. Walk through of the example</h2>
+<p>The ::selenium namespace contains all the WebDriver implementations.
+Currently supported WebDriver implementations are:</p>
+<pre><code>- FirefoxDriver
+- ChromeDriver
+- ChromiumDriver
+- PhantomJSdriver
+- IEdriver
+</code></pre>
+<p>The Key array provide symbolic names for keyboard keys like RETURN, F1, ALT etc.</p>
+<p>The first step is to explicitly require chrome driver.</p>
+<pre><code class="hljs tcl"><span class="hljs-keyword">package</span> require selenium::chrome
+</code></pre>
+<p>When a driver is required, all the selenium package is loaded. This means that it's not necessary to require
+selenium.</p>
+<p>We import the ChromeDriver class, and the instance of Chrome WebDriver is created.</p>
+<pre><code class="hljs tcl"><span class="hljs-keyword">namespace</span> import ::selenium::ChromeDriver
+
+<span class="hljs-keyword">set</span> driver [ChromeDriver new]
+</code></pre>
+<p>The driver <em>get</em> method will navigate to a page given by the URL. WebDriver will wait until the page has fully loaded (that is, the “onload” event has fired) before returning control to your  script. It’s worth noting that if your page uses a lot of AJAX on load then WebDriver may not know when it has completely loaded.:</p>
+<pre><code class="hljs tcl">$driver get <span class="hljs-keyword">http</span>://wiki.tcl.tk/
+</code></pre>
+<p>The next line prints the title.</p>
+<pre><code class="hljs tcl"><span class="hljs-keyword">puts</span> [$driver title]
+</code></pre>
+<p>WebDriver offers a number of ways to find elements using one of the <em>find_element_by_</em> methods. For example, the input text element can be located by its name attribute using find_element_by_name method. Detailed explanation of finding elements is available in the Locating Elements chapter:</p>
+<pre><code class="hljs tcl"><span class="hljs-keyword">set</span> q [$driver find_element_by_name q]
+</code></pre>
+<p>Next we are sending keys, this is similar to entering keys using your keyboard. Special keys can be send using Key array imported from the selenium namespace:</p>
+<pre><code class="hljs tcl">$driver send_keys $q <span class="hljs-string">"hello world"</span>
+$driver send_keys $q $Key(RETURN)
+</code></pre>
+<p>(Remember to upvar Key array from selenium namespace or specify the complete name ::selenium::Key)</p>
+<p>After submission of the page, you should get the result if there is any.
+Finally, the browser window is closed. You can also call quit method instead of close. The quit will exit entire browser whereas close` will close one tab, but if just one tab was open, by default most browser will exit entirely.:</p>
+<pre><code class="hljs tcl">$driver <span class="hljs-keyword">close</span>
+</code></pre>
+<p>It's also possible to create a command for each web element retrieved instead of using the selenium ID provided.
+In this case, the user indicates the variable containing the command name with the option <em>-command_var</em></p>
+<pre><code class="hljs tcl">$driver find_element -css form.search -command_var form
+$form find_element -name q -command_var query
+$query send_keys {hello world!}
+$query send_keys $Keys(RETURN)
+
+$form find_element -css {input[type=<span class="hljs-string">"submit"</span>]} -command_var submit
+$submit click
+</code></pre>
+<h2>2. Drivers of selenium</h2>
+<h3>2.1 Chrome</h3>
+<p>Chrome driver requires chromedriver. chromedriver can be explicitly passed to the constructor</p>
+<pre><code class="hljs tcl">    ChromeDriver -<span class="hljs-keyword">binary</span> path_to_chromedriver
+</code></pre>
+<p>Or it should be in the current working directory, or its directory should be added to the enviroment variable PATH.</p>
+<p>Chrome driver can be downloaded here:
+http://sites.google.com/a/chromium.org/chromedriver/downloads</p>
+<h3>2.2 Chromium</h3>
+<p>Chromium driver has the same options than chrome. It use the same driver</p>
+<pre><code class="hljs tcl">    ChromiumDriver -<span class="hljs-keyword">binary</span> path_to_chromedriver
+</code></pre>
+<h3>2.3 Firefox</h3>
+<h4>2.3.1 Firefox using geckodriver</h4>
+<p>Firefox version 47 and onwards require geckodriver</p>
+<p>Geckodriver can be downloaded here:
+http://github.com/mozilla/geckodriver/releases</p>
+<p>geckodriver can be explicitly passed to the constructor</p>
+<pre><code class="hljs tcl">    FirefoxDriver -<span class="hljs-keyword">binary</span> path_to_geckodriver
+</code></pre>
+<p>Or it should be in the current working directory, or its directory should be added to the enviroment variable PATH.</p>
+<p>There is some difference between this driver and the other drivers:</p>
+<ul>
+<li>The click method in the other drivers scroll into view the element and then make a click. The click method using geckodriver doesnt scroll into view the element. The user has to make this call first:</li>
+</ul>
+<pre><code>    $driver scroll_into_view $element
+</code></pre>
+<h4>2.2.3 Firefox using extension</h4>
+<p>Firefox version before 47 requires:</p>
+<pre><code>- 7z or its standlone version 7za
+- the Tcl extension tdom. 
+</code></pre>
+<p>The path to this executable 7za or 7z can be passed to the constructor of FirefoxDriver with this option <em>-7z</em>.</p>
+<pre><code class="hljs tcl">    FirefoxDriver <span class="hljs-number">-7</span>z path_to_7z
+</code></pre>
+<p>Another possibility is to add the 7za executable in the current working directory or add the directory containing
+7z or 7za to the enviroment variable PATH.</p>
+<p>7z and its standlone version 7za can be downloaded here:
+http://www.7-zip.org/download.html</p>
+<p>Activestate Tcl has tdom included in its batteries. If you need to install this extension, you can download it
+here:
+https://tdom.github.io/</p>
+<h3>2.4 PhantomJS</h3>
+<p>This driver requires the headless browser PhantomJS. This headless browser can be downloaded here:
+http://phantomjs.org/download.html</p>
+<p>The executable can be provided explicitly to the PhantomJSdriver constructor through the <em>-binary</em> option,
+or should be in the current working directory or its directory should be added to the PATH.</p>
+<pre><code class="hljs tcl">    PhantomJSdriver -<span class="hljs-keyword">binary</span> path_to_phantomjs
+</code></pre>
+<h3>2.5 Internet Explorer</h3>
+<p>This driver requires  <em>IEDriverServer.exe</em>.</p>
+<p>This executable can be downloaded here:
+http://docs.seleniumhq.org/download/</p>
+<p>And can be passed explicitly with the <em>-binary</em> option of the constructor or should be in the current working directory or its
+directory should be added to the PATH.</p>
+<pre><code class="hljs tcl">    IEDriver -<span class="hljs-keyword">binary</span> path_to_iedriverserver_exe
+</code></pre>
+<p>The IE driver require some extra steps depending of the internet explorer version:
+https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver</p>
+<h3>2.6 HTMLUNIT</h3>
+<p>HTMLUNIT requires the selenium stanlone server can be downloaded here:
+http://www.seleniumhq.org/download/</p>
+<pre><code class="hljs tcl">    <span class="hljs-keyword">package</span> require selenium
+    <span class="hljs-keyword">package</span> require selenium::utils::port
+
+    <span class="hljs-keyword">set</span> port [::selenium::utils::port::get_free_port]
+    <span class="hljs-keyword">exec</span> java -jar selenium-server-standlone-version.jar -port $port &amp;
+
+    <span class="hljs-keyword">set</span> driver [::selenium::WebDriver new <span class="hljs-keyword">http</span>://<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">4444</span>/wd/hub $::selenium::DesiredCapabilities(HTMLUNITWITHJS)]
+    $driver get <span class="hljs-keyword">http</span>://www.uab.es
+</code></pre>
+<h2>3. Selenium Grid</h2>
+<p>Selenium grid requires de <em>seleniumjar</em> file.</p>
+<p>The selenium stanlone server can be downloaded here:
+http://www.seleniumhq.org/download/</p>
+<p>Documentation for selenium grid:
+https://github.com/SeleniumHQ/selenium/wiki/Grid2</p>
+<p>Example:</p>
+<pre><code class="hljs tcl">    <span class="hljs-keyword">package</span> require selenium
+    <span class="hljs-keyword">package</span> require selenium::utils::port
+
+    <span class="hljs-keyword">set</span> port [::selenium::utils::port::get_free_port]
+    <span class="hljs-keyword">exec</span> java -jar seleniumjar.version.jar -Dwebdriver.chrome.driver=./chromedriver -port $port &amp;
+
+<span class="hljs-comment">    # Create a desired capabilities object as a starting point. </span>
+    <span class="hljs-keyword">set</span> capabilities $::selenium::DesiredCapabilities(FIREFOX)
+    <span class="hljs-keyword">dict</span> <span class="hljs-keyword">set</span> capabilities <span class="hljs-keyword">platform</span> <span class="hljs-string">"WINDOWS"</span>
+    <span class="hljs-keyword">dict</span> <span class="hljs-keyword">set</span> capabilities version <span class="hljs-string">"10"</span>
+
+<span class="hljs-comment">    # Instantiate an instance of Remote WebDriver with the desired capabilities.</span>
+    <span class="hljs-keyword">set</span> driver [::selenium::WebDriver new <span class="hljs-keyword">http</span>:://localhost:$port $capabilities]
+</code></pre>
+<h2>4. Driver</h2>
+<p>The driver object has these subcommands:</p>
+<ul>
+<li>
+<p><strong>start_client</strong></p>
+<p>Called before starting a new session. This method may be overridden to define custom startup behavior.</p>
+</li>
+<li>
+<p><strong>start_session</strong></p>
+<p>Creates a new session with the desired capabilities.</p>
+<p>Arguments:</p>
+<ul>
+<li>desiredCapabilities: It's a dictionary with these keys:
+<ul>
+<li>browser_name - The name of the browser to request.</li>
+<li>version - Which browser version to request.</li>
+<li>platform - Which platform to request the browser on.</li>
+<li>javascript_enabled - Whether the new session should support JavaScript.</li>
+<li>browser_profile - A selenium.driver.firefox.firefox_profile.FirefoxProfile object. Only used if Firefox is requested.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>get</strong></p>
+<p>Loads a web page in the current browser session.</p>
+<p>Arguments:</p>
+<ul>
+<li>url</li>
+</ul>
+</li>
+<li>
+<p><strong>title</strong></p>
+<p>Returns the title of the current page.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">driver title
+</code></pre>
+</li>
+<li>
+<p><strong>execute_javascript</strong> script args</p>
+<p>Executes JavaScript in the current window/frame synchronously or asynchronously.</p>
+<p>Arguments:</p>
+<ul>
+<li>script: The JavaScript to execute.</li>
+</ul>
+<p>:Options:</p>
+<ul>
+<li>arguments spec1? arg1? spec2? arg2?...: Pairs of json specifications and tcl values as arguments for your JavaScript.</li>
+<li>async: Execute javascript asyncronously</li>
+<li>command_var: Variable to store the new command for the element/s</li>
+<li>returns_element: Flag indicating that the script returns an element</li>
+<li>returns_elements: Flag indicating that the script returns a list of elements</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver execute_javascript {<span class="hljs-keyword">return</span> document.title}
+</code></pre>
+</li>
+<li>
+<p><strong>execute_script</strong> script args</p>
+<p>Forward method to *execute_javascript"</p>
+</li>
+<li>
+<p><strong>remove_webelement_from_DOM</strong></p>
+<p>It removes a webelement from DOM</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID: The element ID of the webelement to remove</li>
+</ul>
+</li>
+<li>
+<p><strong>get_base64_image</strong></p>
+<p>Arguments:</p>
+<ul>
+<li>image_webelement</li>
+</ul>
+</li>
+<li>
+<p><strong>is_select_element</strong></p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>tag_name</strong></p>
+<p>Gets this element's tagName property.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>get_visible_text</strong></p>
+<p>Gets the visible text of the element.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>get_text</strong></p>
+<p>Gets the text of the element.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>clear_text</strong></p>
+<p>Clears the text if it's a text entry element.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>get_attribute</strong></p>
+<p>Gets the given attribute or property of the element.</p>
+<p>This method will return the value of the given property if this is set,
+otherwise it returns the value of the attribute with the same name if
+that exists, or None.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+<li>attribute_name - Name of the attribute/property to retrieve.</li>
+</ul>
+<p>Example:</p>
+<p>Check if the "active" CSS class is applied to an element</p>
+<pre><code>    set class_attribute [$driver get_element_attribute $target_element class]
+    set is_active [expr {[string first $class_attribute active]!=-1}]
+</code></pre>
+</li>
+<li>
+<p><strong>is_selected</strong></p>
+<p>Whether the element is selected.</p>
+<p>Can be used to check if a checkbox or radio button is selected.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>is_enabled</strong></p>
+<p>Whether the element is enabled.</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>location_once_scrolled_into_view</strong></p>
+<p>CONSIDERED LIABLE TO CHANGE WITHOUT WARNING. Use this to discover where on the screen an
+element is so that we can click it. This method should cause the element to be scrolled
+into view.</p>
+<p>Returns the top lefthand corner location on the screen, or None if the element is not visible</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>size</strong></p>
+<p>Returns the size of the element</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>get_location</strong></p>
+<p>Returns the location of the element in the renderable canvas</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>get_rect</strong></p>
+<p>Returns a dictionary with the size and location of the element</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>page_source</strong></p>
+<p>Gets the source of the current page.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver page_source
+</code></pre>
+</li>
+<li>
+<p><strong>close</strong></p>
+<p>Closes the current window.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver <span class="hljs-keyword">close</span>
+</code></pre>
+</li>
+<li>
+<p><strong>quit</strong></p>
+<p>Quits the driver and closes every associated window.</p>
+<p>Usage:
+driver quit</p>
+</li>
+<li>
+<p><strong>current_window_handle</strong></p>
+<p>Returns the handle of the current window.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver current_window_handle
+</code></pre>
+</li>
+<li>
+<p><strong>window_handles</strong></p>
+<p>Returns the handles of all windows within the current session.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver window_handles
+</code></pre>
+</li>
+<li>
+<p><strong>maximize_window</strong></p>
+<p>Maximizes the current window that driver is using</p>
+</li>
+<li>
+<p><strong>back</strong></p>
+<p>Goes one step backward in the browser history.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver back
+</code></pre>
+</li>
+<li>
+<p><strong>forward</strong></p>
+<p>Goes one step forward in the browser history.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver forward
+</code></pre>
+</li>
+<li>
+<p><strong>refresh</strong></p>
+<p>Refreshes the current page.</p>
+</li>
+<li>
+<p><strong>get_cookies</strong></p>
+<p>Returns a set of dictionaries, corresponding to cookies visible in the current session.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver get_cookies
+</code></pre>
+</li>
+<li>
+<p><strong>get_cookie</strong> name</p>
+<p>Get a single cookie by name. Returns the cookie if found, None if not.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver get_cookie <span class="hljs-string">'my_cookie'</span>
+</code></pre>
+</li>
+<li>
+<p><strong>delete_cookie</strong></p>
+<p>Deletes a single cookie with the given name.</p>
+<p>Arguments:</p>
+<ul>
+<li>cookie_name</li>
+</ul>
+</li>
+<li>
+<p><strong>add_cookie</strong></p>
+<p>Adds a cookie to your current session.</p>
+<p>Arguments:</p>
+<ul>
+<li>cookie_dict: A dict object, with required keys: "name" and "value";</li>
+</ul>
+<p></p><pre>optional keys - "path", "domain", "secure", "expiry"<p></p>
+<p>Key         Type        Description
+name        string      The name of the cookie.
+value       string      The cookie value.
+path        string      (Optional) The cookie path.1
+domain      string      (Optional) The domain the cookie is visible to.1
+secure      boolean     (Optional) Whether the cookie is a secure cookie.1
+httpOnly    boolean     (Optional) Whether the cookie is an httpOnly cookie.1
+expiry      number      (Optional) When the cookie expires, specified in seconds since midnight, January 1, 1970 UTC.1
+</p></pre><p></p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver add_cookie  name foo  value bar
+    driver add_cookie  name foo  value bar  path /
+    driver add_cookie  name foo  value bar  path /  secure true
+</code></pre>
+</li>
+<li>
+<p><strong>delete_all_cookies</strong></p>
+<p>Delete all cookies in the scope of the session.</p>
+</li>
+<li>
+<p><strong>freeze</strong></p>
+<p>Freeze element or container of webelements
+The command will not be deleted when the program execution leaves the frame</p>
+<p>Arguments:</p>
+<ul>
+<li>varname</li>
+</ul>
+</li>
+<li>
+<p><strong>implicitly_wait</strong></p>
+<p>Sets a sticky timeout to implicitly wait for an element to be found,
+or a command to complete. This method only needs to be called one
+time per session. To set the timeout for calls to
+execute_async_script, see set_script_timeout.</p>
+<p>Arguments:</p>
+<ul>
+<li>time_to_wait: Amount of time to wait (in seconds)</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver implicitly_wait <span class="hljs-number">30</span>
+</code></pre>
+</li>
+<li>
+<p><strong>set_script_timeout</strong></p>
+<p>Set the amount of time that the script should wait during an
+execute_async_script call before throwing an error.</p>
+<p>Arguments:</p>
+<ul>
+<li>time_to_wait: The amount of time to wait (in seconds)</li>
+</ul>
+</li>
+<li>
+<p><strong>set_page_load_timeout</strong></p>
+<p>Set the amount of time to wait for a page load to complete
+before throwing an error.</p>
+<p>Arguments:</p>
+<ul>
+<li>time_to_wait: The amount of time to wait</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">driver set_page_load_timeout <span class="hljs-number">30</span>
+</code></pre>
+</li>
+<li>
+<p><strong>current_capabilities</strong></p>
+<p>returns the drivers current desired capabilities being used</p>
+</li>
+<li>
+<p><strong>get_screenshot_as_file</strong></p>
+<p>Gets the screenshot of the current window. Returns False if there is
+any IOError, else returns True. Use full paths in your filename.</p>
+<p>Arguments:</p>
+<ul>
+<li>filename: The full path you wish to save your screenshot to.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver get_screenshot_as_file /Screenshots/foo.png
+</code></pre>
+</li>
+<li>
+<p><strong>get_screenshot_as_png</strong></p>
+<p>Gets the screenshot of the current window as a binary data.</p>
+</li>
+<li>
+<p><strong>get_screenshot_as_base64</strong></p>
+<p>Gets the screenshot of the current window as a base64 encoded string
+which is useful in embedded images in HTML.</p>
+<p>Usage:
+driver get_screenshot_as_base64</p>
+</li>
+<li>
+<p><strong>set_window_size</strong></p>
+<p>Sets the width and height of the current window.</p>
+<p>Arguments:</p>
+<ul>
+<li>width: the width in pixels to set the window to</li>
+<li>height: the height in pixels to set the window to</li>
+<li>windowHandle (Optional): Default value current</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver set_window_size <span class="hljs-number">800</span> <span class="hljs-number">600</span>
+</code></pre>
+</li>
+<li>
+<p><strong>get_window_size</strong></p>
+<p>Gets the width and height of the current window.</p>
+<p>Arguments:</p>
+<ul>
+<li>windowHandle (Optional): Default value 'current'.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver get_window_size
+</code></pre>
+</li>
+<li>
+<p><strong>set_window_position</strong></p>
+<p>Sets the x,y position of the current window. (window.moveTo)</p>
+<p>Arguments:</p>
+<ul>
+<li>x: the x-coordinate in pixels to set the window position</li>
+<li>y: the y-coordinate in pixels to set the window position</li>
+<li>windowHandle (Optional). Default value is 'current'</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver set_window_position <span class="hljs-number">0</span> <span class="hljs-number">0</span>
+</code></pre>
+</li>
+<li>
+<p><strong>get_window_position</strong></p>
+<p>Arguments:</p>
+<ul>
+<li>windowHandle (Optional). Default value is 'current'</li>
+</ul>
+<p>Gets the x,y position of the current window.</p>
+</li>
+<li>
+<p><strong>get_screen_orientation</strong></p>
+<p>Gets the current orientation of the device</p>
+</li>
+<li>
+<p><strong>set_screen_orientation</strong></p>
+<p>Sets the current orientation of the device</p>
+<p>Arguments:</p>
+<ul>
+<li>value: orientation to set it to.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver set_orientation <span class="hljs-string">"landscape"</span>
+</code></pre>
+</li>
+<li>
+<p><strong>available_log_types</strong>
+Gets a list of the available log types</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver log_types
+</code></pre>
+</li>
+<li>
+<p><strong>get_log</strong></p>
+<p>Gets the log for a given log type</p>
+<p>Arguments:</p>
+<ul>
+<li>log_type: type of log that which will be returned</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   driver get_log browser
+   driver get_log driver
+   driver get_log client
+   driver get_log server
+</code></pre>
+</li>
+<li>
+<p><strong>alert_text</strong></p>
+<p>Gets the text of the Alert.</p>
+</li>
+<li>
+<p><strong>dismiss_alert</strong></p>
+<p>Dismisses the alert available.</p>
+</li>
+<li>
+<p><strong>accept_alert</strong></p>
+<p>Accepts the alert available.</p>
+<p>Usage::
+driver accept_alert # Confirm a alert dialog.</p>
+</li>
+<li>
+<p><strong>send_keys_to_alert</strong></p>
+<p>Send Keys to the Alert.</p>
+<p>Arguments:</p>
+<ul>
+<li>keysToSend: The text to be sent to Alert.</li>
+</ul>
+</li>
+<li>
+<p><strong>get_app_cache_status</strong></p>
+<p>Returns a current status of application cache.</p>
+</li>
+<li>
+<p><strong>scroll_into_view</strong></p>
+<p>Scroll element into view</p>
+<p>Arguments:</p>
+<ul>
+<li>element_ID</li>
+</ul>
+</li>
+<li>
+<p><strong>scroll_to_bottom</strong></p>
+<p>scroll to bottom of webpage</p>
+</li>
+<li>
+<p><strong>scrolling_position</strong></p>
+<p>Get the scrolling position</p>
+</li>
+<li>
+<p><strong>scroll_to_bottom_infinitely</strong></p>
+<p>Scroll to bottom until condition provided is true or it's not possible to scroll more</p>
+<p>Arguments:</p>
+<ul>
+<li>condition_command</li>
+<li>timeout</li>
+</ul>
+</li>
+<li>
+<p><strong>switch_to_default_frame</strong></p>
+<p>Switch focus to the default frame.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver switch_to_default_frame
+</code></pre>
+</li>
+<li>
+<p><strong>switch_to_frame</strong></p>
+<p>Switches focus to the specified frame, by index, name, or webelement.</p>
+<p>Arguments:</p>
+<ul>
+<li>by</li>
+<li>frame_reference: The name of the window to switch to, an integer representing the index,
+or a webelement that is an (i)frame to switch to.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver switch_to_frame -name $frame_name
+    driver switch_to_frame -index <span class="hljs-number">1</span>
+    driver switch_to_frame -element [[driver find_elements_by_tag_name iframe] index <span class="hljs-number">0</span>]
+</code></pre>
+</li>
+<li>
+<p><strong>switch_to_parent_frame</strong></p>
+<p>Switches focus to the parent context. If the current context is the top
+level browsing context, the context remains unchanged.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver switch_to_parent_frame
+</code></pre>
+</li>
+<li>
+<p><strong>switch_to_window</strong></p>
+<p>Switches focus to the specified window.</p>
+<p>Arguments:</p>
+<ul>
+<li>window_name: The name or window handle of the window to switch to.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver switch_to_window main
+</code></pre>
+</li>
+<li>
+<p><strong>move_mouse_to</strong></p>
+<p>Move the mouse by an offset of the specificed element.
+If no element is specified, the move is relative to the current mouse cursor
+If an element is provided but no offset, the mouse will be moved to the center of the element.
+If the element is not visible, it will be scrolled into view.</p>
+<p>Arguments:</p>
+<ul>
+<li>
+<p>element: ID assigned to the webelement to move to, as described in the WebElement JSON Object.
+If not specified or is null, the offset is relative to current position of the mouse.</p>
+</li>
+<li>
+<p>xoffset: X offset to move to, relative to the top-left corner of the element.
+If not specified, the mouse will move to the middle of the element.</p>
+</li>
+<li>
+<p>yoffset: Y offset to move to, relative to the top-left corner of the element.
+If not specified, the mouse will move to the middle of the element.</p>
+</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">    driver move_mouse_to <span class="hljs-number">10</span> <span class="hljs-number">21</span> $element
+</code></pre>
+</li>
+<li>
+<p><strong>network_connection</strong></p>
+<p>ConnectionType is a bitmask to represent a device's network connection
+</p><pre>Data | WIFI | Airplane
+0      0     1          == 1
+1      1     0          == 6
+1      0     0          == 4
+0      1     0          == 2
+0      0     0          == 0
+</pre><p></p>
+<p>Giving "Data" the first bit positions in order to give room for the future of enabling specific types of data (Edge / 2G, 3G, 4G, LTE, etc) if the device allows it.</p>
+</li>
+</ul>
+<ul>
+<li>
+<p><strong>set_network_connection</strong></p>
+<p>Set the Connection type
+Not all connection type combinations are valid for an individual type of device
+and the remote endpoint will make a best effort to set the type as requested</p>
+</li>
+<li>
+<p><strong>double_click</strong></p>
+<p>Make double click</p>
+</li>
+<li>
+<p><strong>move_mouse</strong></p>
+<p>Moving the mouse to an offset from current mouse position.</p>
+<p>Arguments:</p>
+<ul>
+<li>xoffset</li>
+<li>yoffset</li>
+</ul>
+</li>
+<li>
+<p><strong>move_mouse_to_element</strong></p>
+<p>Moving the mouse to the middle of an element, possibly adding some offsets</p>
+<ul>
+<li>element_ID</li>
+<li>xoffset (Optional)</li>
+<li>yoffset (Optional)</li>
+</ul>
+</li>
+<li>
+<p><strong>mouse_down</strong></p>
+<p>Press mouse button.</p>
+<p>Arguments:</p>
+<ul>
+<li>buttonName</li>
+</ul>
+</li>
+<li>
+<p><strong>mouse_up</strong></p>
+<p>Release mouse button</p>
+<p>Arguments:</p>
+<ul>
+<li>buttonName</li>
+</ul>
+</li>
+<li>
+<p><strong>find_element</strong></p>
+<p>Find element by strategy location</p>
+<p>Arguments:</p>
+<ul>
+<li>
+<p>strategy location:</p>
+<p>-id
+-xpath
+-name
+-link_text
+-tag_name
+-partial_link_text
+-css
+-class
+-link_text</p>
+</li>
+<li>
+<p>It's possible to find a descendant element from another element, indicating its element ID</p>
+</li>
+</ul>
+<pre><code class="hljs tcl">       -root *element_ID*
+</code></pre>
+<ul>
+<li>Build a new command if you want to apply several acctions to this element to avoid adding
+always its element ID. A new webelement object will be created.</li>
+</ul>
+<pre><code class="hljs tcl">      - command_var *name_of_command_variable*
+</code></pre>
+<p>Usage:</p>
+<pre><code class="hljs tcl">driver find_element -css <span class="hljs-string">".foo"</span>
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements</strong></p>
+<p>Finds elements by strategy location</p>
+<p>It has the same options than find_element.
+The option "-command_var" builds a container of webelements object.</p>
+<p>Usage:</p>
+<pre><code class="hljs tcl">driver find_elements -css <span class="hljs-string">".foo"</span>
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_id</strong></p>
+<p>Finds an element by id.</p>
+<p>Arguments:</p>
+<ul>
+<li>id - The id of the element to be found.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_id foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_id</strong></p>
+<p>Finds multiple elements by id.</p>
+<p>Arguments:</p>
+<ul>
+<li>id - The id of the elements to be found.</li>
+</ul>
+<p>Usage:</p>
+<pre><code>   $driver find_element_by_id foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_xpath</strong></p>
+<p>Finds an element by xpath.</p>
+<p>Arguments:</p>
+<ul>
+<li>xpath - The xpath locator of the element to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_xpath {//div/td[<span class="hljs-number">1</span> -level <span class="hljs-number">1</span> {*}$args]}
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_xpath</strong></p>
+<p>Finds multiple elements by xpath.</p>
+<p>Arguments:</p>
+<ul>
+<li>xpath - The xpath locator of the elements to be found.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_xpath {//div[contains(@class, foo -level <span class="hljs-number">1</span> {*}$args]}
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_link_text</strong></p>
+<p>Finds an element by link text.</p>
+<p>Arguments:</p>
+<ul>
+<li>link_text: The text of the element to be found.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_link_text {Sign In}
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_link_text</strong></p>
+<p>Finds elements by link text.</p>
+<p>Arguments:</p>
+<ul>
+<li>link_text: The text of the elements to be found.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_link_text <span class="hljs-string">'Sign In'</span>
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_partial_link_text</strong> link_text</p>
+<p>Finds an element by a partial match of its link text.</p>
+<p>Arguments:</p>
+<ul>
+<li>link_text: The text of the element to partially match on.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_partial_link_text Sign
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_partial_link_text</strong> link_text</p>
+<p>Finds elements by a partial match of their link text.</p>
+<p>Arguments:</p>
+<ul>
+<li>link_text: The text of the element to partial match on.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_partial_link_text Sign
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_name</strong></p>
+<p>Finds an element by name.</p>
+<p>Arguments:</p>
+<ul>
+<li>name: The name of the element to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_name</strong></p>
+<p>Finds elements by name.</p>
+<p>Arguments:</p>
+<ul>
+<li>name: The name of the elements to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_tag_name</strong></p>
+<p>Finds an element by tag name.</p>
+<p>Arguments:</p>
+<ul>
+<li>tag_name: The tag name of the element to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_tag_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_tag_name</strong></p>
+<p>Finds elements by tag name.</p>
+<p>Arguments:</p>
+<ul>
+<li>tag_name: The tag name the use when finding elements.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_tag_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_class_name</strong></p>
+<p>Finds an element by class name.</p>
+<p>Arguments:</p>
+<ul>
+<li>class_name: The class name of the element to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_class_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_class_name</strong></p>
+<p>Finds elements by class name.</p>
+<p>Arguments:</p>
+<ul>
+<li>class_name: The class name of the elements to find.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_class_name foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_element_by_css_selector</strong></p>
+<p>Finds an element by css selector.</p>
+<p>Arguments:</p>
+<ul>
+<li>css_selector: The css selector to use when finding elements.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_element_by_css_selector #foo
+</code></pre>
+</li>
+<li>
+<p><strong>find_elements_by_css_selector</strong></p>
+<p>Finds elements by css selector.</p>
+<p>Arguments:</p>
+<ul>
+<li>css_selector: The css selector to use when finding elements.</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="hljs tcl">   $driver find_elements_by_css_selector .foo
+</code></pre>
+</li>
+</ul>
+<h2>5. Expected conditions</h2>
+<p>It's possible to wait until some condition on the webpage happens.</p>
+<p>For example, to wait 3 seconds until "seleninum is great" appears on the title of the window.</p>
+<pre><code class="hljs tcl">    ::selenium::wait_until -driver $driver -condition [::selenium::expected_condition title_is <span class="hljs-string">"seleninum is great"</span>] -timeout <span class="hljs-number">4</span>
+</code></pre>
+<p>If after this 3 seconds, the condition didn't happen a "Exception(Timeout)" is raised.</p>
+<p>It's also possible to use this abbrevation <code>::selenium::EC</code>. For example, to wait 4 seconds until confirm_button
+is nos present in the DOM:</p>
+<pre><code class="hljs tcl">    ::selenium::wait_until -driver $driver -condition [::selenium::EC staleness_of $confirm_button] -timeout <span class="hljs-number">4</span>
+</code></pre>
+<p>This is a complete list of expected conditions:</p>
+<ul>
+<li>
+<p><strong>title_is</strong> title</p>
+<p>An expectation for checking the title of a page.</p>
+<p>Arguments:</p>
+<ul>
+<li>title: It's the expected title, which must be an exact match</li>
+</ul>
+</li>
+<li>
+<p><strong>title_contains</strong> text</p>
+<p>An expectation for checking that the title contains a case-sensitive substring.</p>
+<p>Arguments:</p>
+<ul>
+<li>text: It's the fragment of title expected</li>
+</ul>
+</li>
+<li>
+<p><strong>presence_of_element_located</strong> by value element</p>
+<p>An expectation for checking that an element is present on the DOM
+of a page. This does not necessarily mean that the element is visible.</p>
+</li>
+<li>
+<p><strong>visibility_of_element_located</strong> by value</p>
+<p>An expectation for checking that an element is present on the DOM of a
+page and visible. Visibility means that the element is not only displayed
+but also has a height and width that is greater than 0.</p>
+</li>
+<li>
+<p><strong>visibility_of</strong> element</p>
+<p>An expectation for checking that an element, known to be present on the
+DOM of a page, is visible. Visibility means that the element is not only
+displayed but also has a height and width that is greater than 0.</p>
+<p>Arguments:</p>
+<ul>
+<li>element: the element to wait of its visibility</li>
+</ul>
+</li>
+<li>
+<p><strong>text_to_be_present_in_element</strong> by value text</p>
+<p>An expectation for checking if the given text is present in the specified element by locator.</p>
+</li>
+<li>
+<p><strong>text_to_be_present_in_element_value</strong> by value text</p>
+<p>An expectation for checking if the given text is present in the element's locator, text</p>
+</li>
+<li>
+<p><strong>element_has_this_attribute_value</strong> element attribute_name attribute_value</p>
+<p>An expectation for checking if the given element has an specific attribute name and value</p>
+</li>
+</ul>
+<ul>
+<li>
+<p><strong>frame_to_be_available_and_switch_to_it</strong> optionName optionValue</p>
+<p>An expectation for checking whether the given frame is available to
+switch to.  If the frame is available it switches the given driver to the
+specified frame.</p>
+</li>
+<li>
+<p><strong>invisibility_of_element_located</strong> by value</p>
+<p>An Expectation for checking that an element is either invisible or not present on the DOM.
+In the case of NoSuchElement, returns true because the element is
+not present in DOM. The try block checks if the element is present but is invisible.</p>
+<p>In the case of StaleElementReference, returns true because stale element reference
+implies that element is no longer visible.</p>
+</li>
+<li>
+<p><strong>invisibility_of_all_elements_located</strong> by value</p>
+<p>An Expectation for checking that all elements indicated are invisible</p>
+</li>
+<li>
+<p><strong>element_to_be_clickable</strong> by value</p>
+<p>An Expectation for checking an element is visible and enabled such that you can click it.</p>
+</li>
+<li>
+<p><strong>staleness_of</strong> element</p>
+<p>Wait until an element is no longer attached to the DOM.</p>
+<p>Arguments:</p>
+<ul>
+<li>element: The element to wait for.</li>
+</ul>
+</li>
+<li>
+<p><strong>element_to_be_selected</strong> element</p>
+<p>An expectation for checking the selection is selected.
+element is WebElement object</p>
+</li>
+<li>
+<p><strong>element_located_to_be_selected</strong> by value</p>
+<p>An expectation for the element to be located is selected.</p>
+</li>
+<li>
+<p><strong>element_selection_state_to_be</strong> element is_selected</p>
+<p>An expectation for checking if the given element is selected.</p>
+<p>Arguments:</p>
+<ul>
+<li>element</li>
+<li>is_selected: Boolean indicating whether to wait for select or not select</li>
+</ul>
+</li>
+<li>
+<p><strong>element_located_selection_state_to_be</strong> by value is_selected</p>
+<p>An expectation to locate an element and check if the selection state
+specified is in that state.</p>
+<p>Arguments:</p>
+<ul>
+<li>by: The strategy of location</li>
+<li>value: The parameter value for that strategy</li>
+<li>is_selected: Boolean indicating whether to wait for select or not select</li>
+</ul>
+</li>
+<li>
+<p><strong>alert_is_present</strong></p>
+<p>Expect an alert to be present.</p>
+</li>
+</ul>
+<h2>6. Xvfb</h2>
+<p>Tcl wrapper to xvfb server.</p>
+<p>Example of usage:</p>
+<pre><code class="hljs tcl">   <span class="hljs-keyword">package</span> require selenium::firefox
+   <span class="hljs-keyword">package</span> require xvfbwrapper
+   
+   <span class="hljs-keyword">set</span> xvfb [::xvfb::Xvfb new -width <span class="hljs-number">342</span> -height <span class="hljs-number">234</span>]
+   $xvfb start
+     <span class="hljs-keyword">set</span> driver [::selenium::FirefoxDriver -<span class="hljs-keyword">binary</span> \path\to\geckodriver]
+     $driver get <span class="hljs-keyword">http</span>://www.google.es
+   $xvfb stop
+</code></pre>
+<h2>7. Constants</h2>
+<h3>Mouse Buttons</h3>
+<p>We have these symbolic names for the mouse buttons in the selenium namespace:</p>
+<pre><code>    Mouse_Button(LEFT)
+    Mouse_Button(MIDDLE)
+    Mouse_Button(RIGHT)
+</code></pre>
+<h3>Keys</h3>
+<p>We have these symbolic keys in the selenenium namespace:</p>
+<pre><code>    Key(CANCEL)
+    Key(HELP)
+    Key(BACKSPACE)
+    Key(TAB)
+    Key(CLEAR)
+    Key(RETURN)
+    Key(ENTER)
+    Key(SHIFT)
+    Key(CONTROL)
+    Key(ALT)
+    Key(PAUSE)
+    Key(ESCAPE)
+    Key(SPACE)
+    Key(PAGEUP)
+    Key(PAGEDOWN)
+    Key(END)
+    Key(HOME)
+    Key(LEFTARROW)
+    Key(UPARROW)
+    Key(RIGHTARROW)
+    Key(DOWNARROW)
+    Key(INSERT)
+    Key(DELETE)
+    Key(EQUALS)
+    Key(NUMPAD0)
+    Key(NUMPAD1)
+    Key(NUMPAD2)
+    Key(NUMPAD3)
+    Key(NUMPAD4)
+    Key(NUMPAD5)
+    Key(NUMPAD6)
+    Key(NUMPAD7)
+    Key(NUMPAD8)
+    Key(NUMPAD9)
+    Key(MULTIPLY)
+    Key(ADD)
+    Key(SEPARATOR)
+    Key(SUBTRACT)
+    Key(DECIMAL)
+    Key(DIVIDE)
+    Key(F1)
+    Key(F2)
+    Key(F3)
+    Key(F4)
+    Key(F5)
+    Key(F6)
+    Key(F7)
+    Key(F8)
+    Key(F9)
+    Key(F10)
+    Key(F11)
+    Key(F12)
+    Key(META)
+</code></pre>
+<h3>StatusCache</h3>
+<p>These are the symbolic values for the status cache:</p>
+<pre><code>    StatusCache(UNCACHED)
+    StatusCache(IDLE)
+    StatusCache(CHECKING)
+    StatusCache(DOWNLOADING)
+    StatusCache(UPDATE_READY)
+    StatusCache(OBSOLETE)
+</code></pre>
+<h3>Exceptions</h3>
+<p>List of exceptions:</p>
+<pre><code>    Exception(ConnectionRefused)
+        Connection refused. It's not possible to reach webdriver server.
+        
+    Exception(ElementIsNotSelectable)
+        An attempt was made to select an element that cannot be selected.
+        
+    Exception(ElementNotSelectable)
+        Thrown when trying to select an unselectable element.
+        
+        For example, selecting a 'script' element.
+        
+    Exception(ElementNotVisible)
+        Thrown when an element is present on the DOM, but
+        it is not visible, and so is not able to be interacted with.
+        
+        Most commonly encountered when trying to click or read text
+        of an element that is hidden from view.
+        
+    Exception(ErrorInResponse)
+        Thrown when an error has occurred on the server side.
+        
+        This may happen when communicating with the firefox extension or the remote driver server.
+        
+    Exception(IMEEngineActivationFailed)
+        Thrown when activating an IME engine has failed.
+
+    Exception(IMENotAvailable)
+        Thrown when IME support is not available. This exception is thrown for every IME-related
+        method call if IME support is not available on the machine.
+        
+    Exception(InvalidCommandMethod)
+        If a request path maps to a valid resource, but that resource does not respond to the request method,
+        the server should respond with a 405 Method Not Allowed. The response must include an Allows header with a 
+        list of the allowed methods for the requested resource. 
+        
+    Exception(InvalidCookieDomain)
+        Thrown when attempting to add a cookie under a different domain
+        than the current URL.
+        
+    Exception(InvalidElementCoordinates)
+         The coordinates provided to an interactions operation are invalid.
+        
+    Exception(InvalidElementState)
+        Thrown when an unexpected alert is appeared.
+        
+        Usually raised when when an expected modal is blocking webdriver form executing any
+        more commands.
+        
+    Exception(InvalidSelector)
+        Thrown when the selector which is used to find an element does not return
+        a WebElement. Currently this only happens when the selector is an xpath
+        expression and it is either syntactically invalid (i.e. it is not a
+        xpath expression) or the expression does not select WebElements
+        (e.g. "count(//input)").
+        
+    Exception(InvalidSwitchToTarget)
+        Thrown when frame or window target to be switched doesn't exist.
+        
+    Exception(JavaScriptError)
+        An error occurred while executing user supplied JavaScript. 
+        
+    Exception(MissingCommandParameters)
+        If a POST/PUT command maps to a resource that expects a set of JSON parameters, and the response body does
+        not include one of those parameters, the server should respond with a 400 Bad Request.
+        The response body should list the missing parameters.   
+        
+    Exception(MoveTargetOutOfBounds)
+        Thrown when the target provided to the `ActionsChains` move
+        method is invalid, i.e. out of document.
+        
+    Exception(NoAlertOpen)
+        An attempt was made to operate on a modal dialog when one was not open. 
+        
+    Exception(NoSuchAttribute)
+        Thrown when the attribute of element could not be found.
+        
+        You may want to check if the attribute exists in the particular browser you are
+        testing against.  Some browsers may have different property names for the same
+        property.  (IE8's .innerText vs. Firefox .textContent)
+        
+    Exception(NoSuchDriver) 
+        A session is either terminated or not started 
+        
+    Exception(NoSuchElement)
+        Thrown when element could not be found.
+        
+        If you encounter this exception, you may want to check the following:
+        * Check your selector used in your find_by...
+        * Element may not yet be on the screen at the time of the find operation,
+        (webpage is still loading)
+        
+    Exception(NoSuchFrame)
+        Thrown when frame target to be switched doesn't exist.
+        
+    Exception(NoSuchWindow)
+        Thrown when window target to be switched doesn't exist.
+        
+        To find the current set of active window handles, you can get a list
+        of the active window handles in the following way::
+        
+        puts [$driver window_handles]
+        
+    Exception(ScriptTimeout)
+        A script did not complete before its timeout expired. 
+        
+    Exception(SessionNotCreated)
+        A new session could not be created. 
+        
+    Exception(StaleElementReference)
+        Thrown when a reference to an element is now "stale".
+        
+        Stale means the element no longer appears on the DOM of the page.
+        
+        
+        Possible causes of StaleElementReferenceException include, but not limited to:
+        * You are no longer on the same page, or the page may have refreshed since the element was located.
+        * The element may have been removed and re-added to the screen, since it was located.
+        Such as an element being relocated.
+        This can happen typically with a javascript framework when values are updated and the node is rebuilt.
+        * Element may have been inside an iframe or another context which was refreshed.
+        
+    Exception(Timeout)
+        Thrown when a command does not complete in enough time.
+        
+    Exception(UnableToSetCookie)
+        Thrown when a driver fails to set a cookie.
+        
+    Exception(UnexpectedAlertOpen)
+        Thrown when an unexpected alert is appeared.
+
+        Usually raised when when an expected modal is blocking webdriver form executing any 
+        more commands.
+        
+    Exception(UnexpectedTagName)
+        Thrown when a support class did not get an expected web element.
+        
+    Exception(UnknownCommand)
+        The requested resource could not be found, or a request was received using an HTTP method that is not
+        supported by the mapped resource.
+        
+    Exception(UnknownError)
+         An unknown server-side error occurred while processing the command. 
+        
+    Exception(WebdriverException)
+        Unknown webdriver exception
+
+    Exception(XPathLookupError)
+         An error occurred while searching for an element by XPath. 
+</code></pre>
+
+
+</div> <!-- markdown-body -->
+
+</div> <!-- container -->
+
+
+<div id="footer">Selenium-Tcl 2016 &copy; Miguel Martínez López</div>
+</body>
+
+</html>

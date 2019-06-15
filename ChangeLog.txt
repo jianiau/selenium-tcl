@@ -1,0 +1,46 @@
+Selenium 2.3.2
+    - Fixed bug with selenium version
+
+Selenium 2.3.1
+    - Backwards compatibility to method execute_script.
+    This method has the same name than the selenium Python API version.
+    - Changed a little bit the command option names of execute_javascript
+        -return_element is now -returns_element
+        -return_elements is now -returns_elements
+        
+Selenium 2.3
+    - Improved support for proxies
+
+Selenium 2.2
+    - Improved firefox driver
+    - Improved configuration options for several drivers
+    - Added a new wait_for_page_load method
+
+Selenium 2.1
+    - Added proxy options to different drivers
+    - Added info about exceptions to the docs
+
+Selenium 2
+    - Improved documentation
+    - Fixed several bug in firefox driver
+    - Added xvfbwrapper module
+
+Selenium 1.11
+    - Improved documentation for expected conditions
+    - Fixed bug with expected conditions
+
+Selenium 1.10
+    - Improved documentation of the different drivers
+
+Selenium 1.9
+    - Changed flag "-desiredCapabilities" to -"capabilities"
+    - Available proxy option to capabilities of PhantomJSdriver
+Selenium 1.8
+    - Fixed more bugs in firefox driver.
+    Now firefox also works for Firefox 47 using geckodriver
+    - Improved stack frame error when a selenium exception is raised on the browser
+    - Added internet explorer driver.
+    - Changed flag "-pathToBinary" to "-binary".
+Selenium 1.7
+    - Bug fixed of firefox and phantomJS driver
+    - Added 2 examples
