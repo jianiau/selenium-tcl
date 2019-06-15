@@ -84,7 +84,7 @@ namespace eval ::selenium {
 		"$Command(CLEAR_ELEMENT)" {POST /session/:sessionId/element/:id/clear {sessionId id}}
 		"$Command(SUBMIT_ELEMENT)" {POST /session/:sessionId/element/:id/submit {sessionId id}}
 		"$Command(GET_ELEMENT_TEXT)" {GET /session/:sessionId/element/:id/text {sessionId id}}
-		"$Command(SEND_KEYS_TO_ELEMENT)" {POST /session/:sessionId/element/:id/value {sessionId id} {dict value list}}
+		"$Command(SEND_KEYS_TO_ELEMENT)" {POST /session/:sessionId/element/:id/value {sessionId id} {dict value list text string}}
 		"$Command(TYPEWRITE)" {POST /session/:sessionId/keys {sessionId} {dict value list}}
 		"$Command(UPLOAD_FILE)" {POST /session/:sessionId/file {sessionId} {}}
 		"$Command(GET_ELEMENT_VALUE)" {GET /session/:sessionId/element/:id/value {sessionId id}}

@@ -521,7 +521,7 @@ namespace eval ::selenium {
 			# $driver send_keys -el $form_textfield -string admin
 			# $driver send_keys admin $form_textfield
 
-			my execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""]
+			my execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""] text $string_of_keys
 		}
         
         method typewrite {string_of_keys} {

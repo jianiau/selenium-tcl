@@ -162,7 +162,7 @@ namespace eval ::selenium::webelement {
 			# $driver send_keys -el $form_textfield -string admin
 			# $driver send_keys admin $form_textfield
 
-			$driver execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""]
+			$driver execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""] text $string_of_keys
 		}
 		
         method select_element {command_var} {
