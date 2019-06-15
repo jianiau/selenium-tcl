@@ -100,10 +100,16 @@ namespace eval ::selenium {
             } else {
                 set json_response [my execute $Command(NEW_SESSION) desiredCapabilities $desired_capabilities requiredCapabilities $required_capabilities]
             }
+            if {![dict exists $json_response sessionId]} {
+                set json_response [dict get $json_response value]
+            }
+            set session_ID [dict get $json_response sessionId]
+            if {[dict exists $json_response value]} {
+                set current_capabilities [dict get $json_response value]
+            } else {
+                set current_capabilities [dict get $json_response capabilities]
+            }
 
-			set session_ID [dict get $json_response sessionId]
-			set current_capabilities [dict get $json_response value]
-            
             # Quick check to see if we have a W3C Compliant browser
             if {[dict exists $json_response status]} {
                 set w3c_compliant 0
