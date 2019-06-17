@@ -42,7 +42,6 @@ namespace eval ::selenium {
             namespace eval [self] {
                 namespace upvar ::selenium Command Command Exception Exception Mouse_Button Mouse_Button StatusCache StatusCache By By
             }
-			                                
 			set remote_connection [::selenium::Remote_Connection new $service_url]
 
 			set session_ID ""
@@ -983,16 +982,25 @@ namespace eval ::selenium {
 			# 	driver switch_to_frame -name $frame_name
 			# 	driver switch_to_frame -index 1
 			# 	driver switch_to_frame -element [[driver find_elements_by_tag_name iframe] index 0]
-	
+
 			switch -exact -- $by {
 				-index {
 					set parameters [list id [compile_to_json number $frame_reference]]
 				}
 				-name {
-					set parameters [list id [compile_to_json string $frame_reference]]
+				    if {!$w3c_compliant} {
+				        set parameters [list id [compile_to_json string $frame_reference]]
+				    } else {
+				        if [catch {my find_element -name $frame_reference} frame_elem] {
+				            if [catch {my find_element -id $frame_reference} frame_elem] {
+				                error "Can not find frame $frame_reference"
+				            }
+				        }
+				        set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_elem element-6066-11e4-a52e-4f735466cecf $frame_elem]]]    
+				    }
 				}
 				-element {
-					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference]]]
+					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference element-6066-11e4-a52e-4f735466cecf $frame_reference]]]
 				}
 				default {
 					error "Invalid switch type reference for switch_to_frame: $type"
