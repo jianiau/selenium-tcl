@@ -105,8 +105,10 @@ namespace eval ::selenium {
 			set session_ID [dict get $json_response value sessionId]
 			set current_capabilities [dict get $json_response value capabilities]
             
-
-            if {[dict exists $json_response status]} {
+            # Quick check to see if we have a W3C Compliant browser.
+            # According to SauceLabs "If that line begins with 'desiredCapabilities', you are running the non-W3C version. If it begins with 'capabilities', you are running the new W3C-compliant version."
+            # Refactor to proper test https://wiki.saucelabs.com/display/DOCS/Selenium+W3C+Capabilities+Support
+            if {[dict exists $json_response value desiredCapabilities]} {
                 set w3c_compliant 0
             } else {
                 set w3c_compliant 1
