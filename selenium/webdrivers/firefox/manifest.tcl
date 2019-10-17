@@ -1,4 +1,4 @@
-package provide selenium::firefox::manifest 0.1
+package provide selenium::firefox::manifest 0.2
 
 package require tdom
 

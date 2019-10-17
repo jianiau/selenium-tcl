@@ -1,4 +1,4 @@
-package provide selenium::firefox 0.1
+package provide selenium::firefox 0.2
 
 package require selenium
 package require selenium::utils::port

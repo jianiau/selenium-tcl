@@ -1,4 +1,4 @@
-package provide selenium::firefox::profile 0.1
+package provide selenium::firefox::profile 0.2
 
 package require selenium::firefox::manifest
 
