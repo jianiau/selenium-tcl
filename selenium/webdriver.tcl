@@ -521,7 +521,7 @@ namespace eval ::selenium {
 			# $driver send_keys -el $form_textfield -string admin
 			# $driver send_keys admin $form_textfield
 
-			my execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""]
+			my execute $Command(SEND_KEYS_TO_ELEMENT) id $element_ID value [split $string_of_keys ""] text $string_of_keys
 		}
         
         method typewrite {string_of_keys} {
@@ -789,7 +789,7 @@ namespace eval ::selenium {
 			return $current_capabilities
 		}
 
-		method get_screenshot_as_file {filename} {
+		method get_screenshot_as_file {filename {element_ID ""}} {
 			# Gets the screenshot of the current window. Returns False if there is
 			# any IOError, else returns True. Use full paths in your filename.
 			# 
@@ -799,7 +799,7 @@ namespace eval ::selenium {
 			# :Usage:
 			# 	driver get_screenshot_as_file /Screenshots/foo.png
 
-			set png [my get_screenshot_as_png]
+			set png [my get_screenshot_as_png $element_ID]
 			
 			if { [catch {open $filename wb} fileId] } {
 				return false
@@ -814,20 +814,24 @@ namespace eval ::selenium {
 		
 		forward save_screenshot get_screenshot_as_file
 		
-		method get_screenshot_as_png {} {
+		method get_screenshot_as_png {{element_ID ""}} {
 			# Gets the screenshot of the current window as a binary data.
 
-			return [::base64::decode [my get_screenshot_as_base64]]
+			return [::base64::decode [my get_screenshot_as_base64 $element_ID]]
 		}
 		
-		method get_screenshot_as_base64 {} {
+		method get_screenshot_as_base64 {{element_ID ""}} {
 			# Gets the screenshot of the current window as a base64 encoded string
 			# which is useful in embedded images in HTML.
 			# 
 			# :Usage:
 			# 	driver get_screenshot_as_base64
 
-			return [my execute_and_get_value $Command(SCREENSHOT)]
+			            if {$element_ID eq ""} {
+                return [my execute_and_get_value $Command(SCREENSHOT)]
+			} else {
+				return [my execute_and_get_value $Command(ELEMENT_SCREENSHOT) id $element_ID]
+			}
 		}
 		
 		method set_window_size {width height {windowHandle current}} {
@@ -988,11 +992,19 @@ namespace eval ::selenium {
 					set parameters [list id [compile_to_json number $frame_reference]]
 				}
 				-name {
-					set parameters [list id [compile_to_json string $frame_reference]]
-				}
+
+				    if {!$w3c_compliant} {
+				        set parameters [list id [compile_to_json string $frame_reference]]
+				    } else {
+				        if [catch {my find_element -name $frame_reference} frame_elem] {
+				            if [catch {my find_element -id $frame_reference} frame_elem] {
+				                error "Can not find frame $frame_reference"
+				            }
+				        }
+				        set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_elem element-6066-11e4-a52e-4f735466cecf $frame_elem]]]    
+				    }				}
 				-element {
-					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference]]]
-				}
+ 					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference]]]				}
 				default {
 					error "Invalid switch type reference for switch_to_frame: $type"
 				}
