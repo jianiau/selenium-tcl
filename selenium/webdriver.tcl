@@ -1006,7 +1006,6 @@ namespace eval ::selenium {
 				-element {
  					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference element-6066-11e4-a52e-4f735466cecf $frame_reference]]]
 					                       }
-				}
 				default {
 					error "Invalid switch type reference for switch_to_frame: $type"
 				}
