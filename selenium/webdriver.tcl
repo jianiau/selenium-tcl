@@ -42,7 +42,6 @@ namespace eval ::selenium {
             namespace eval [self] {
                 namespace upvar ::selenium Command Command Exception Exception Mouse_Button Mouse_Button StatusCache StatusCache By By
             }
-			                                
 			set remote_connection [::selenium::Remote_Connection new $service_url]
 
 			set session_ID ""
@@ -100,11 +99,15 @@ namespace eval ::selenium {
             } else {
                 set json_response [my execute $Command(NEW_SESSION) desiredCapabilities $desired_capabilities requiredCapabilities $required_capabilities]
             }
+	    
+	    #  Test if it's new JSON whichis wrapped in brace called "value" and extract if so.
+            if {![dict exists $json_response sessionId]} {
+                set json_response [dict get $json_response value]
+            }
+	    
+            set session_ID [dict get $json_response sessionId]
+            set current_capabilities [dict get $json_response capabilities]
 
-			# Changed {sessionId, capabilities} -> value {sessionId, capabilities}
-			set session_ID [dict get $json_response value sessionId]
-			set current_capabilities [dict get $json_response value capabilities]
-            
             # Quick check to see if we have a W3C Compliant browser.
             # According to SauceLabs "If that line begins with 'desiredCapabilities', you are running the non-W3C version. If it begins with 'capabilities', you are running the new W3C-compliant version."
             # Refactor to proper test https://wiki.saucelabs.com/display/DOCS/Selenium+W3C+Capabilities+Support
