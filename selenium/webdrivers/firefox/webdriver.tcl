@@ -1,4 +1,4 @@
-package provide selenium::firefox 0.1
+package provide selenium::firefox 0.2
 
 package require selenium
 package require selenium::utils::port
@@ -277,7 +277,7 @@ namespace eval ::selenium::webdrivers::firefox {
         }
         
         method _start_client_with_geckodriver {} {
-            set parameters [list --webdriver-port=$port -b $path_to_browser_binary]
+            set parameters [list --port=$port -b $path_to_browser_binary]
 
             if {[info exists path_to_log_file]} {
                 lappend parameters --log-file=\"$path_to_log_file\"

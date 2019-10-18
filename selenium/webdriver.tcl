@@ -99,18 +99,19 @@ namespace eval ::selenium {
             } else {
                 set json_response [my execute $Command(NEW_SESSION) desiredCapabilities $desired_capabilities requiredCapabilities $required_capabilities]
             }
+	    
+	    #  Test if it's new JSON whichis wrapped in brace called "value" and extract if so.
             if {![dict exists $json_response sessionId]} {
                 set json_response [dict get $json_response value]
             }
+	    
             set session_ID [dict get $json_response sessionId]
-            if {[dict exists $json_response value]} {
-                set current_capabilities [dict get $json_response value]
-            } else {
-                set current_capabilities [dict get $json_response capabilities]
-            }
+            set current_capabilities [dict get $json_response capabilities]
 
-            # Quick check to see if we have a W3C Compliant browser
-            if {[dict exists $json_response status]} {
+            # Quick check to see if we have a W3C Compliant browser.
+            # According to SauceLabs "If that line begins with 'desiredCapabilities', you are running the non-W3C version. If it begins with 'capabilities', you are running the new W3C-compliant version."
+            # Refactor to proper test https://wiki.saucelabs.com/display/DOCS/Selenium+W3C+Capabilities+Support
+            if {[dict exists $json_response value desiredCapabilities]} {
                 set w3c_compliant 0
             } else {
                 set w3c_compliant 1
@@ -126,6 +127,7 @@ namespace eval ::selenium {
 			# 
 			# :Returns:
 			# 	The command's JSON response loaded into a dict object.
+
 			set response [$remote_connection dispatch $session_ID $command_name $args]
 
 			set json_response [$error_handler check_response $session_ID $command_name $args $response]
@@ -814,7 +816,8 @@ namespace eval ::selenium {
 		
 		method get_screenshot_as_png {{element_ID ""}} {
 			# Gets the screenshot of the current window as a binary data.
-		    return [::base64::decode [my get_screenshot_as_base64 $element_ID]]
+
+			return [::base64::decode [my get_screenshot_as_base64 $element_ID]]
 		}
 		
 		method get_screenshot_as_base64 {{element_ID ""}} {
@@ -823,7 +826,8 @@ namespace eval ::selenium {
 			# 
 			# :Usage:
 			# 	driver get_screenshot_as_base64
-            if {$element_ID eq ""} {
+
+			            if {$element_ID eq ""} {
                 return [my execute_and_get_value $Command(SCREENSHOT)]
 			} else {
 				return [my execute_and_get_value $Command(ELEMENT_SCREENSHOT) id $element_ID]
@@ -982,12 +986,13 @@ namespace eval ::selenium {
 			# 	driver switch_to_frame -name $frame_name
 			# 	driver switch_to_frame -index 1
 			# 	driver switch_to_frame -element [[driver find_elements_by_tag_name iframe] index 0]
-
+	
 			switch -exact -- $by {
 				-index {
 					set parameters [list id [compile_to_json number $frame_reference]]
 				}
 				-name {
+
 				    if {!$w3c_compliant} {
 				        set parameters [list id [compile_to_json string $frame_reference]]
 				    } else {
@@ -997,11 +1002,10 @@ namespace eval ::selenium {
 				            }
 				        }
 				        set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_elem element-6066-11e4-a52e-4f735466cecf $frame_elem]]]    
-				    }
-				}
+				    }				}
 				-element {
-					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference element-6066-11e4-a52e-4f735466cecf $frame_reference]]]
-				}
+ 					set parameters [list id [compile_to_json dict [dict create ELEMENT $frame_reference element-6066-11e4-a52e-4f735466cecf $frame_reference]]]
+					                       }
 				default {
 					error "Invalid switch type reference for switch_to_frame: $type"
 				}
